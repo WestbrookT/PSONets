@@ -45,7 +45,7 @@ class Net:
             for i in range(count):
                 neuron = [random.uniform(-deviation, deviation) for j in range(prev_count)]
                 layer.append(neuron)
-
+            prev_count = count
             net.append(layer)
 
         self.net_weights = net
@@ -144,10 +144,15 @@ class Swarm:
 
         return best_net
 
-    def train(self, inputs, outputs, epochs=100, threshold=.5):
+    def train(self, inputs, outputs, epochs=100, threshold=.5, report_rate=100):
 
+        converged = False
 
         for epoch in range(epochs):
+
+            if epoch % report_rate == 0:
+                print("Currently on epoch:", epoch, "Has converged since last report:", converged)
+                converged = False
 
             self.best = self.find_best(inputs, outputs)
 
@@ -156,7 +161,10 @@ class Swarm:
                 self.move_towards_best(net)
 
             if self.converged(threshold):
-                print('The swarm has converged. Resetting.')
+                #print('The swarm has converged. Resetting.')
+
+                converged = True
+
                 self.nets = [self.best]
 
                 while len(self.nets) < self.count:
@@ -190,8 +198,6 @@ class Swarm:
         for i, value in enumerate(vector):
 
             delta = (value - best_vector[i]) * self.learning_rate
-
-
             weight = value - delta
 
             new_weights.append(weight)
@@ -202,22 +208,23 @@ class Swarm:
 
 
 
+if __name__ == '__main__':
+    random.seed(1)
+
+    layers = [2, 5, 5, 1]
 
 
+    swarm = Swarm(layers, relu, deviation=10, count=5, learning_rate=.1)
 
-layers = [2, 5, 1]
+    inputs = [[1, 1], [0, 1], [1, 0], [0, 0]]
+    outputs = [[0], [1], [1], [0]]
 
-
-swarm = Swarm(layers, sigmoid, deviation=1, count=100, learning_rate=.000000000001)
-
-inputs = [[1, 1], [0, 1], [1, 0], [0, 0]]
-outputs = [[1], [0], [0], [0]]
-
-swarm.train(inputs, outputs, 1000, threshold=.001)
+    swarm.train(inputs, outputs, 5000, threshold=1)
 
 
-print(swarm.best.forward_propagation(inputs[0]))
-print(swarm.best.forward_propagation(inputs[1]))
-print(swarm.best.forward_propagation(inputs[3]))
+    print("Out:", swarm.best.forward_propagation(inputs[0]), "Expected:", outputs[0])
+    print("Out:", swarm.best.forward_propagation(inputs[1]), "Expected:", outputs[1])
+    print("Out:", swarm.best.forward_propagation(inputs[2]), "Expected:", outputs[2])
+    print("Out:", swarm.best.forward_propagation(inputs[3]), "Expected:", outputs[3])
 
-print(swarm.best.vector())
+    print(swarm.best.vector())
