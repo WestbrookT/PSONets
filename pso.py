@@ -205,7 +205,17 @@ class Swarm:
 
         net.update_weights(new_weights)
 
+    def test(self, inputs, outputs):
 
+        total_distance = 0
+        count = 0
+
+        for i in range(len(inputs)):
+
+            total_distance += distance(self.best.forward_propagation(inputs[i]), outputs[i])
+            count += 1
+
+        return total_distance/count
 
 
 if __name__ == '__main__':
