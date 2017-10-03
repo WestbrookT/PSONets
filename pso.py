@@ -35,7 +35,7 @@ class Net:
 
     def __init__(self, layers, activation, deviation=10):
 
-        prev_count = layers[0]
+        prev_count = layers[0] + 1
         self.activation = activation
 
         net = []
@@ -45,7 +45,7 @@ class Net:
             for i in range(count):
                 neuron = [random.uniform(-deviation, deviation) for j in range(prev_count)]
                 layer.append(neuron)
-            prev_count = count
+            prev_count = count + 1
             net.append(layer)
 
         self.net_weights = net
@@ -55,7 +55,7 @@ class Net:
 
     def forward_propagation(self, nums):
 
-        outs = nums
+        outs = [1] + nums
 
         for layer in self.net_weights:
 
@@ -70,9 +70,9 @@ class Net:
                     total += outs[i] * weight
 
                 out_new.append(self.activation(total))
-            outs = out_new
+            outs = [1] + out_new
 
-        return outs
+        return outs[1:]
 
     def average_distance(self, inputs, outputs):
 
@@ -211,15 +211,15 @@ class Swarm:
 if __name__ == '__main__':
     random.seed(1)
 
-    layers = [2, 5, 5, 1]
+    layers = [2, 1, 1]
 
 
-    swarm = Swarm(layers, relu, deviation=10, count=5, learning_rate=.1)
+    swarm = Swarm(layers, relu, deviation=5, count=5, learning_rate=.1)
 
     inputs = [[1, 1], [0, 1], [1, 0], [0, 0]]
-    outputs = [[0], [1], [1], [0]]
+    outputs = [[0], [1], [1], [1]]
 
-    swarm.train(inputs, outputs, 5000, threshold=1)
+    swarm.train(inputs, outputs, 10000, threshold=.1)
 
 
     print("Out:", swarm.best.forward_propagation(inputs[0]), "Expected:", outputs[0])
